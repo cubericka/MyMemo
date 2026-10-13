@@ -1,0 +1,46 @@
+{
+  "version": "3.1.0-preview",
+  "versionCode": 310,
+  "tests": [
+    {
+      "name": "com.personal.memostarter.DatabaseTests",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.EditorTests",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.ScreenTests",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.TemplateTests",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.WidgetTests",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "total": 16,
+  "failures": 0,
+  "errors": 0,
+  "apk_sha256": "aaa79c60c48cf91964230e8a1fe38e1e9ed6eda5691b7b09c5c606733c628415",
+  "physical_device_verified": false
+}

@@ -1,0 +1,75 @@
+{
+  "apk_sha256": "a5b74c446142d6f31ca7f58c61112fda5a5be7044718ee12e52a7c8e58c51884",
+  "apk_bytes": 1425679,
+  "certificate_sha256": "7b3055e021f870627220502642016fd8e195f919019ac1877c52776e88f5b086",
+  "signer_purpose": "VALIDATION ONLY, not official customer signer",
+  "indexed": {
+    "dex": 1,
+    "native_libraries": 8,
+    "all_entries": 92
+  },
+  "unit_tests": [
+    {
+      "name": "com.personal.memostarter.DatabaseTests",
+      "tests": "6",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.EditorTests",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.InstalledIntegrityTests",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.IntegrityTests",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.ScreenTests",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.TemplateTests",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.VaultTests",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.personal.memostarter.WidgetTests",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "total_unit_tests": 36,
+  "internet_permission": false,
+  "debuggable": false,
+  "source_and_apk_private_keys": false,
+  "r8_mapping_sha256": "4f39995db268732a7b04460e1eccea089d0ef0cd869699e7b7575394caf1ca25",
+  "actual_install_tested": false
+}

@@ -1,0 +1,6 @@
+<manifest android:installLocation="internalOnly" xmlns:android="http://schemas.android.com/apk/res/android">
+<application android:name=".MemoApp" android:label="${appLabel}" android:icon="@drawable/ic_memo" android:theme="@android:style/Theme.Material.Light.NoActionBar" android:allowBackup="false" android:fullBackupContent="false" android:dataExtractionRules="@xml/data_extraction_rules" android:supportsRtl="true">
+<activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTop" android:windowSoftInputMode="adjustResize"><intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter></activity>
+<activity android:name=".WidgetConfigActivity" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/></intent-filter></activity>
+<receiver android:name=".MemoWidget" android:exported="false"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/memo_widget"/></receiver>
+</application></manifest>

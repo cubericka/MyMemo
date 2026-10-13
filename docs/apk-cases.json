@@ -1,0 +1,75 @@
+{
+  "method": "Actual APK signatures via Android apksig + shared PackageIntegrity JVM verifier; no emulator installation",
+  "cases": [
+    {
+      "file": "normal.apk",
+      "expected": "OK",
+      "actual": "OK",
+      "pass": true,
+      "sha256": "a5b74c446142d6f31ca7f58c61112fda5a5be7044718ee12e52a7c8e58c51884"
+    },
+    {
+      "file": "dex-modified.apk",
+      "expected": "CONTENT_HASH",
+      "actual": "CONTENT_HASH",
+      "pass": true,
+      "sha256": "8e48302aa9825cceb135644c1412ce38da39c65c23cf4a8c011d17dbe4a25798"
+    },
+    {
+      "file": "resigned.apk",
+      "expected": "SIGNER",
+      "actual": "SIGNER",
+      "pass": true,
+      "sha256": "343e782b235443f4c8e20c554542b078a4a6128cf195ebae3e4af9cf2c57aa19"
+    },
+    {
+      "file": "native-modified.apk",
+      "expected": "CONTENT_HASH",
+      "actual": "CONTENT_HASH",
+      "pass": true,
+      "sha256": "ee3c4c6fa79f2491aeb49fbe071373ac7608ff6e84f62cdfdd44d137eea0d42e"
+    },
+    {
+      "file": "resource-modified.apk",
+      "expected": "CONTENT_HASH",
+      "actual": "CONTENT_HASH",
+      "pass": true,
+      "sha256": "0cd9a609dd63d16b501a059c4f3a44b16a98912aa780ba4571a000ddaa6aaad0"
+    },
+    {
+      "file": "added-dex.apk",
+      "expected": "ENTRY_SET",
+      "actual": "ENTRY_SET",
+      "pass": true,
+      "sha256": "e80626ef0d762a987e02b1d5c15eb87b4e378dff0244210e36704a18fcdb23f3"
+    },
+    {
+      "file": "removed-resource.apk",
+      "expected": "ENTRY_SET",
+      "actual": "ENTRY_SET",
+      "pass": true,
+      "sha256": "7373148d6011a35cb3c6c7f14173720b8fe44fb406fb9bd445b73f5d04c1d954"
+    },
+    {
+      "file": "index-modified.apk",
+      "expected": "INDEX_SIGNATURE",
+      "actual": "INDEX_SIGNATURE",
+      "pass": true,
+      "sha256": "2e920ebe03f4eb674e65bc131d539a2f7a9eb31485303fa4f0ede9a1a3eff37c"
+    },
+    {
+      "file": "unsealed.apk",
+      "expected": "UNREADABLE",
+      "actual": "UNREADABLE",
+      "pass": true,
+      "sha256": "d3a4b96830cfc47cb6a9a4abc03f81dba6f4aad681295d749ecb5209de012760"
+    },
+    {
+      "file": "signature-broken.apk",
+      "expected": "APK_SIGNATURE_INVALID",
+      "actual": "APK_SIGNATURE_INVALID",
+      "pass": true,
+      "sha256": "68eeafc0b87b423ddf7f3605ba99d97baa7c405e644773f64b1a8d7e5a84b79b"
+    }
+  ]
+}
