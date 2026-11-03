@@ -23,6 +23,11 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+      - uses: android-actions/setup-android@v4
+        with:
+          cmdline-tools-version: 12266719
       - name: Install Android SDK packages
         run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
       - name: Compile release and run tests
@@ -37,3 +42,11 @@ jobs:
             app/build/test-results/
             app/build/reports/
           retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-release-input
+          path: |
+            app/build/outputs/apk/release/app-release-unsigned.apk
+            app/build/generated/source/buildConfig/release/com/personal/memostarter/BuildConfig.java
+          if-no-files-found: error
+          retention-days: 3
