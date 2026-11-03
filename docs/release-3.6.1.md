@@ -2,6 +2,7 @@
 
 첨부된 3.6.0 잉크 & 앰버 소스 기준 업데이트입니다.
 
+- 메모 편집 옵션의 `앱 잠금 설정` 항목을 제거했습니다. 공통 잠금 설정은 메인 화면과 환경설정에서 유지하며, 메모 정보·상단 고정·이동·휴지통 옵션은 그대로입니다.
 - 설정 → 어플 정보: 앱 이름, 현재 버전, 제작자 `아카라이브 모르윈` 표시.
 - 휴지통: 선택 삭제, 전체 비우기, 개별 영구 삭제. 삭제 전 확인하며 복원 UI는 제거했습니다. 선택한 부모의 하위 메모도 함께 삭제합니다. 사용 중인 메모나 없어진 항목이 섞이면 전체 작업을 취소합니다.
 - 메인 화면의 잠금 버튼과 설정에서 앱 공통 숫자 4자리 PIN 설정·변경·사용 해제·즉시 잠금. 앱 재시작 또는 백그라운드 복귀 시 PIN 확인.
@@ -22,8 +23,8 @@
 
 ## 검증 결과
 
-검증 커밋: `1886552cff2d78f5e5306ff03f40ea6efe67d77a`.
-[GitHub Actions 검증 빌드](https://github.com/cubericka/MyMemo/actions/runs/41660992558): 릴리스(미서명)·디버그 APK 빌드 성공. Android/Robolectric 테스트 **60개 통과**, 실패 0개, 설치 패키지 무결성 fixture 테스트 **10개 제외**(별도 fixture 없음). 배포 도구 테스트 **8개 통과**.
+검증 커밋: `926308949e2c3725187b3c7c87753effd24935d9`.
+[GitHub Actions 검증 빌드](https://github.com/cubericka/MyMemo/actions/runs/41666575076): 릴리스(미서명)·디버그 APK 빌드 성공. Android/Robolectric 테스트 **60개 통과**, 실패 0개, 설치 패키지 무결성 fixture 테스트 **10개 제외**(별도 fixture 없음). 배포 도구 테스트 **8개 통과**.
 
 테스트 APK `MyMemo-3.6.1-test.apk`:
 
@@ -31,12 +32,12 @@
 - 패키지: `com.cubericka.mymemo.titledrag.debug`
 - 버전: 3.6.1 (361), 최소 Android 8 (API 26)
 - CI에서 APK Signature Scheme v2 검증 성공.
-- SHA-256: `cb5cafcc647c8c136cc2a6bedaa2ad07691a80bdb3074bc3966dd4c1424a1c68`
-- 테스트 서명 인증서 SHA-256: `df84953d1846c904630d5261d019e784e4c54a5807fb41aaa41b0ce48a75719d`
+- SHA-256: `36d2ccc593dbc0e89de461533b851d49db52886af1f5f6114acc068cd1ec2fab`
+- 테스트 서명 인증서 SHA-256: `d64ea914b81023b009401a70d8c778be879b08f5ae2708cacadfff7d48e8712c`
 
 테스트 APK는 기존 앱과 별도 설치됩니다. 기존 메모가 자동 이전되지 않으며, 기존 앱을 업데이트하는 정식 서명 APK가 아닙니다. 임시 테스트 서명이므로 이후 다른 테스트 빌드와의 업데이트 설치 호환성도 보장하지 않습니다.
 
-실제 휴대폰 설치·실행, Android Keystore 및 제조사별 런처, 기존 3.6.0 위 업데이트 설치는 확인하지 못했습니다. 화면 이미지는 Robolectric 렌더링입니다. 상세 결과는 [검증 JSON](verification-3.6.1.json), 실기기 확인 항목은 [확인표](device-checklist-3.6.1.md)를 참조하세요.
+실제 휴대폰 설치·실행, Android Keystore 및 제조사별 런처, 기존 3.6.0 위 업데이트 설치는 확인하지 못했습니다. 화면 이미지는 Robolectric 렌더링입니다. 상세 결과는 [검증 JSON](https://github.com/cubericka/MyMemo/blob/update/v3.6.1-app-pin-trash/docs/verification-3.6.1.json), 실기기 확인 항목은 [확인표](https://github.com/cubericka/MyMemo/blob/update/v3.6.1-app-pin-trash/docs/device-checklist-3.6.1.md)를 참조하세요.
 
 ## 제공 파일과 미완료 사항
 

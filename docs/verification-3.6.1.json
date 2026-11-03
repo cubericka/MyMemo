@@ -1,9 +1,9 @@
 {
   "version_name": "3.6.1",
   "version_code": 361,
-  "source_commit": "1886552cff2d78f5e5306ff03f40ea6efe67d77a",
-  "ci_run_id": 41660992558,
-  "ci_url": "https://github.com/cubericka/MyMemo/actions/runs/41660992558",
+  "source_commit": "926308949e2c3725187b3c7c87753effd24935d9",
+  "ci_run_id": 41666575076,
+  "ci_url": "https://github.com/cubericka/MyMemo/actions/runs/41666575076",
   "release_compile": "passed_unsigned",
   "debug_compile": "passed",
   "android_tests": {
@@ -134,10 +134,11 @@
   "apk": {
     "filename": "MyMemo-3.6.1-test.apk",
     "bytes": 17719588,
-    "sha256": "cb5cafcc647c8c136cc2a6bedaa2ad07691a80bdb3074bc3966dd4c1424a1c68",
+    "sha256": "36d2ccc593dbc0e89de461533b851d49db52886af1f5f6114acc068cd1ec2fab",
     "application_id": "com.cubericka.mymemo.titledrag.debug",
     "signature_verified_in_ci": true,
-    "type": "debug_test_only"
+    "type": "debug_test_only",
+    "certificate_sha256": "d64ea914b81023b009401a70d8c778be879b08f5ae2708cacadfff7d48e8712c"
   },
   "production_signature": {
     "status": "not_created",
@@ -151,5 +152,6 @@
     "10 installed-package integrity fixture tests (fixtures unavailable)"
   ],
   "main_merged": false,
-  "backup_commit": "b30e473cdcd93ea10e0610e135f5e90e26d83d88"
+  "backup_commit": "b30e473cdcd93ea10e0610e135f5e90e26d83d88",
+  "memo_options_app_lock_removed": true
 }
