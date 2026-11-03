@@ -70,7 +70,7 @@ private fun date(time: Long) = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.KOREA
    if(!editing)ReadingScreen(editor!!,notes,busy,vm::back,vm::startEditing,vm::open)
    else EditorScreen(editor!!, notes, busy, vm::back, vm::save, vm::open,
     onChild = { vm.create(editor!!.id) }, onPin = { vm.action { vm.repo.pin(editor!!.id) } },
-    onMove = { moveTarget = notes.find { it.id == editor!!.id } }, onTrash = { deleteTarget = notes.find { it.id == editor!!.id } }, onAppLock={appPinSettings=true},onRead=vm::finishEditing)
+    onMove = { moveTarget = notes.find { it.id == editor!!.id } }, onTrash = { deleteTarget = notes.find { it.id == editor!!.id } }, onRead=vm::finishEditing)
   } else if (trashScreen) TrashScreen(notes,busy,{trashScreen=false},vm::deleteTrash)
   else if(settings) SettingsScreen(vm,notes,{settings=false;vm.repo.forgetKeys()},{trashScreen=true},{about=true})
   else ListScreen(notes, checks, vm::open, { vm.create() }, { vm.create(it.id) }, { deleteTarget = it }, { moveTarget = it },
@@ -211,7 +211,7 @@ private fun rows(all: List<Note>, roots: List<Note>, collapsed: Set<Long>): List
   }
  }
 }
-@Composable private fun EditorScreen(session: EditorSession, notes: List<Note>, busy: Boolean, onBack: () -> Unit, onSave: () -> Unit, onOpen: (Long) -> Unit, onChild: () -> Unit, onPin: () -> Unit, onMove: () -> Unit, onTrash: () -> Unit,onAppLock: () -> Unit,onRead: () -> Unit) {
+@Composable private fun EditorScreen(session: EditorSession, notes: List<Note>, busy: Boolean, onBack: () -> Unit, onSave: () -> Unit, onOpen: (Long) -> Unit, onChild: () -> Unit, onPin: () -> Unit, onMove: () -> Unit, onTrash: () -> Unit,onRead: () -> Unit) {
  val state by session.state.collectAsState(); val draft = state.draft; val note = notes.find { it.id == session.id }; val children = TreeRules.ordered(notes.filter { it.parentId == session.id && it.trashedAt == null })
  val template = MemoTemplates.get(draft.template)
  val focusManager = LocalFocusManager.current
@@ -226,7 +226,6 @@ private fun rows(all: List<Note>, roots: List<Note>, collapsed: Set<Long>): List
   TextButton(onClick=onRead,enabled=!busy){Text("읽기")}
   Action(Icons.AutoMirrored.Outlined.Undo, "실행 취소", state.canUndo && !busy, session::undo); Action(Icons.AutoMirrored.Outlined.Redo, "다시 실행", state.canRedo && !busy, session::redo)
   Box { Action(Icons.Outlined.MoreHoriz, "편집 메뉴") { menu = true }; DropdownMenu(menu, { menu = false }) {
-   DropdownMenuItem(text={Text("앱 잠금 설정")},onClick={menu=false;onAppLock()})
    DropdownMenuItem(text = { Text("메모 정보") }, onClick = { menu = false; metadata = true })
    DropdownMenuItem(text = { Text(if (note?.pinned == true) "고정 해제" else "상단 고정") }, onClick = { menu = false; onPin() })
    DropdownMenuItem(text = { Text("다른 위치로 이동") }, onClick = { menu = false; onMove() }); DropdownMenuItem(text = { Text("휴지통으로") }, onClick = { menu = false; onTrash() })
