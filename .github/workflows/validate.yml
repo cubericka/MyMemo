@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      MYMEMO_RELEASE_CERT_SHA256: c79f39f8c3de98981ea85d8a4e6c40e5b084fcc3807d97b815603991dce0d5d4
+      MYMEMO_RELEASE_CERT_SHA256: c4e0943c2bb1aa2478f9c33ab1fe3a8926fd2d416259e36113f11004c4da7d85
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
@@ -66,3 +66,17 @@ jobs:
           path: test-apk/
           if-no-files-found: error
           retention-days: 14
+      - name: Package public tools for offline signing
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p offline-tools/sdk/build-tools/35.0.0
+          "$JAVA_HOME/bin/jlink" --add-modules java.base,java.compiler,jdk.compiler,jdk.crypto.ec,jdk.zipfs,java.logging,java.xml,java.naming --strip-debug --no-header-files --no-man-pages --output offline-tools/java
+          cp "$ANDROID_HOME/build-tools/35.0.0/zipalign" "$ANDROID_HOME/build-tools/35.0.0/aapt" offline-tools/sdk/build-tools/35.0.0/
+          cp -r "$ANDROID_HOME/build-tools/35.0.0/lib" "$ANDROID_HOME/build-tools/35.0.0/lib64" offline-tools/sdk/build-tools/35.0.0/
+          tar -czf offline-signing-tools.tar.gz -C offline-tools .
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push'
+        with:
+          name: offline-signing-tools
+          path: offline-signing-tools.tar.gz
+          retention-days: 1
