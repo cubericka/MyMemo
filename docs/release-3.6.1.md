@@ -25,7 +25,7 @@
 - APK Signature Scheme v2·v3, zipalign 16KB 정렬, 공개 인증서 일치 검증 성공.
 - 실제 서명 APK에 대한 앱 자체 무결성 검사 `OK`.
 - 패키지·버전 확인 및 디버그 비활성 확인.
-- Release 게시 workflow는 Android 14 에뮬레이터에서 설치, 실행, 메모 옵션·저장, Android Keystore PIN 설정과 강제 종료 후 재잠금·해제를 검사하고 통과한 파일만 게시합니다. 실행 결과는 Release의 `emulator-results.json`에 기록합니다.
+- [Android 14 에뮬레이터 실행 검사](https://github.com/cubericka/MyMemo/actions/runs/41724522227)의 설치·실행 단계에서 8개 항목을 통과했습니다. 설치, 실행, 메모 옵션·저장·재열기, Android Keystore PIN 설정과 강제 종료 후 재잠금·해제를 확인했습니다. 첫 실행의 마지막 게시 단계는 검사 개수 오타로 실패했으며, 오타를 수정한 게시 workflow에서 동일 APK와 통과한 실행 결과를 재검증해 사용합니다. Release의 `emulator-results.json`에 실제 결과를 제공합니다.
 - 실제 휴대폰, 제조사별 런처 및 위젯, Android 8 등 다른 OS 버전의 실행은 미검증입니다.
 
 APK SHA-256: `79fbc6c5123ea2d32726d51e9b2db5fe4e95dd808b243a4f675a7146073d7b31`

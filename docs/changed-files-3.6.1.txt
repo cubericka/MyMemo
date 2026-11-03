@@ -47,5 +47,10 @@ docs/device-checklist-3.6.1.md
 docs/verification-3.6.1.json
 .github/workflows/draft-release.yml
 
+MyMemo-3.4.2-release.apk
+docs/MyMemo-release-certificate.der
+.github/workflows/publish-release.yml
+.github/scripts/smoke_release.py
+
 Removed:
 tools/__pycache__/protect_release.cpython-314.pyc

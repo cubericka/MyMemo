@@ -21,4 +21,4 @@ JDK 17, Android SDK 36, build-tools 35.0.0을 사용합니다. 키와 비밀번�
 python3 tools/build_release.py --java-home /path/to/jdk17 --sdk /path/to/android-sdk --keystore /private/path/MyMemo-release-2026.p12 --alias release
 ```
 
-비밀번호는 대화형으로 입력합니다. Gradle의 릴리스 출력은 서명 전 중간 파일이므로 위 보호·서명 절차를 완료한 APK만 배포하세요. Android/Robolectric 테스트 60개와 배포 도구 테스트 8개가 통과했습니다. 별도 fixture가 없는 10개 테스트는 제외했고 실제 휴대폰 검증은 하지 않았습니다. 정식 Release 게시 단계에서 서명 검증과 Android 14 에뮬레이터 실행 검사를 수행합니다.
+비밀번호는 대화형으로 입력합니다. Gradle의 릴리스 출력은 서명 전 중간 파일이므로 위 보호·서명 절차를 완료한 APK만 배포하세요. Android/Robolectric 테스트 60개와 배포 도구 테스트 8개가 통과했습니다. 별도 fixture가 없는 10개 테스트는 제외했고 실제 휴대폰 검증은 하지 않았습니다. 서명 검증과 Android 14 에뮬레이터의 설치·실행 검사 8개도 통과했습니다.

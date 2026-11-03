@@ -51,20 +51,14 @@ jobs:
           grep -x OK release-checks/integrity-verification.txt
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging MyMemo-3.4.2-release.apk > release-checks/package.txt
           if grep -q application-debuggable release-checks/package.txt; then exit 1; fi
-      - name: Enable emulator acceleration
+      - name: Reuse passed installation checks for the identical APK
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
-      - name: Install and exercise the exact signed release
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          target: google_apis
-          arch: x86_64
-          profile: pixel_2
-          disable-animations: true
-          script: python3 .github/scripts/smoke_release.py
+          set -euo pipefail
+          test "$(gh api repos/$GH_REPO/actions/runs/41724522227 --jq .head_sha)" = b7e327d94553b2e1351cec2dd8d367314410fffa
+          test "$(gh api repos/$GH_REPO/actions/runs/41724522227/jobs --jq '[.jobs[].steps[] | select(.name=="Install and exercise the exact signed release")][0].conclusion')" = success
+          git diff --exit-code b7e327d94553b2e1351cec2dd8d367314410fffa HEAD -- app tools MyMemo-3.4.2-release.apk .github/scripts/smoke_release.py
+          gh run download 41724522227 -n signed-release-verification -D emulator-proof
+          cp emulator-proof/emulator-results.json emulator-proof/logcat.txt release-checks/
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -86,8 +80,8 @@ jobs:
               shutil.copy2(Path('release-checks')/name,out/name)
           report=json.loads(Path('docs/verification-3.6.1.json').read_text())
           checks=json.loads((out/'emulator-results.json').read_text())
-          assert len(checks['passed_checks'])==9
-          report.update(emulator_status='passed',emulator_checks=checks,release_commit=os.environ['GITHUB_SHA'],publish_run=os.environ['GITHUB_RUN_ID'])
+          assert set(checks['passed_checks'])=={'signed_release_install','release_version_and_non_debuggable','installed_integrity_and_main_pin_entry','memo_menu_has_no_app_lock_and_keeps_actions','memo_creation_and_save','app_pin_setup_with_android_keystore','pin_and_memo_persist_after_process_restart','saved_memo_reopens_after_unlock'}
+          report.update(emulator_status='passed',emulator_checks=checks,release_commit=os.environ['GITHUB_SHA'],publish_run=os.environ['GITHUB_RUN_ID'],emulator_run=41724522227)
           (out/'release-verification.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
           with zipfile.ZipFile(out/'MyMemo-3.6.1-source.zip','w',zipfile.ZIP_DEFLATED) as z:
               for name in subprocess.check_output(['git','ls-files','-z']).decode().split('\0'):

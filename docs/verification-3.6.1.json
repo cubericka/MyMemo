@@ -147,8 +147,23 @@
     }
   ],
   "host_tests_passed": 8,
-  "emulator_status": "pending",
+  "emulator_status": "passed",
   "physical_device_status": "not_tested",
   "update_from_previous_signer": false,
-  "main_merged": false
+  "main_merged": false,
+  "emulator_checks": {
+    "api": 34,
+    "environment": "Android emulator, not physical device",
+    "passed_checks": [
+      "signed_release_install",
+      "release_version_and_non_debuggable",
+      "installed_integrity_and_main_pin_entry",
+      "memo_menu_has_no_app_lock_and_keeps_actions",
+      "memo_creation_and_save",
+      "app_pin_setup_with_android_keystore",
+      "pin_and_memo_persist_after_process_restart",
+      "saved_memo_reopens_after_unlock"
+    ]
+  },
+  "emulator_run": 41724522227
 }
