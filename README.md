@@ -1,32 +1,24 @@
 # MyMemo 3.6.1
 
-잉크 & 앰버 메모 앱. 제목 영역을 길게 눌러 드래그 정렬하고, 여러 메모를 선택하여 휴지통으로 옮길 수 있습니다. 설정의 어플 정보에 앱 이름·현재 버전·제작자 **아카라이브 모르윈**을 표시합니다.
+잉크 & 앰버 메모 앱. 제목 영역 드래그 정렬, 다중선택, 공통 숫자 PIN, 휴지통 선택·전체 영구 삭제, 4×1 다중 메모 위젯을 제공합니다. 제작자: **아카라이브 모르윈**.
 
-3.6.1에서는 앱 공통 숫자 PIN과 휴지통 선택/전체 영구 삭제를 추가했습니다. 메모별 편집 옵션에는 앱 잠금 설정을 표시하지 않으며, 공통 잠금 설정은 메인 화면과 환경설정에서 사용합니다. 복원 UI는 제거했으며 영구 삭제 전 확인합니다. 기존 암호화 메모와 Room 스키마 v4를 유지합니다.
+메모별 편집 옵션의 앱 잠금 설정은 제거했습니다. 공통 잠금 설정은 메인 화면과 환경설정에서 사용합니다. 데이터베이스 구조와 기존 메모 기능을 유지합니다.
 
+- 버전: **3.6.1 (361)**
 - 패키지: `com.cubericka.mymemo.titledrag`
-- 버전: `3.6.1` (361)
-- 정식 서명 출력 파일명: `MyMemo-3.4.2-release.apk` (기존 이름 유지)
-- 현재 제공 테스트 APK: `MyMemo-3.6.1-test.apk` — 별도 설치용 `.debug` 패키지
-- 저장소 루트 APK는 기존 3.4.2입니다. 3.6.1 정식 서명 APK는 기존 키 부재로 미제작입니다.
-- [기능·호환성·검증 상태](docs/release-3.6.1.md)
+- 정식 APK 파일명: `MyMemo-3.4.2-release.apk` — 요청에 따라 이름을 유지했으며 파일 내부 버전은 3.6.1입니다.
+- [정식 APK와 소스 ZIP](https://github.com/cubericka/MyMemo/releases/tag/v3.6.1)
+- [서명·검증·설치 호환성](docs/release-3.6.1.md)
 - 기존 main 백업: `backup/legacy-version`
 
-## 빌드
+이번 정식 배포부터 사용자 승인으로 **새 서명 키**를 사용합니다. 같은 패키지의 이전 서명 앱에 덮어 업데이트할 수 없고, 기존 메모는 자동 이전되지 않습니다. 기존 앱을 삭제하거나 초기화하지 마세요. `.debug` 테스트 앱과는 별도 설치됩니다. 이후 업데이트는 이번 새 키를 계속 사용해야 합니다.
 
-JDK 17, Android SDK platform 36, build-tools 35.0.0이 필요합니다.
+## 빌드와 서명
 
-```sh
-export MYMEMO_RELEASE_CERT_SHA256=c79f39f8c3de98981ea85d8a4e6c40e5b084fcc3807d97b815603991dce0d5d4
-./gradlew :app:assembleRelease :app:testDebugUnitTest
-```
-
-릴리스 Gradle 출력은 미서명 APK입니다. 기존 보호·서명 절차 `tools/build_release.py`를 사용하고 서명 키는 프로젝트 바깥에 보관하세요. 비밀번호는 대화형으로 입력합니다. 서명 키를 저장소에 커밋하지 마세요.
+JDK 17, Android SDK 36, build-tools 35.0.0을 사용합니다. 키와 비밀번호는 저장소에 포함하지 않습니다. `tools/release-policy.json`의 공개 인증서 지문으로 빌드·서명을 검증합니다.
 
 ```sh
-python3 tools/build_release.py --java-home /path/to/jdk17 --sdk /path/to/android-sdk --keystore /private/path/mymemo-title-drag.p12 --alias release
+python3 tools/build_release.py --java-home /path/to/jdk17 --sdk /path/to/android-sdk --keystore /private/path/MyMemo-release-2026.p12 --alias release
 ```
 
-기존 GitHub 3.4.2와 첨부된 3.6.0은 패키지 및 서명이 다릅니다. 3.6.1은 첨부된 3.6.0 계열의 업데이트이며, GitHub 구버전의 메모를 자동 이전하지 않습니다. 기기에서 기존 앱을 삭제하거나 데이터를 초기화하지 마세요.
-
-자동 검증: Android 테스트 60개 + 배포 도구 테스트 8개 통과. 별도 fixture가 필요한 10개 테스트와 실기기 설치·업데이트 검증은 미확인입니다. 상세 결과와 파일 목록은 [릴리스 설명](docs/release-3.6.1.md)을 참조하세요.
+비밀번호는 대화형으로 입력합니다. Gradle의 릴리스 출력은 서명 전 중간 파일이므로 위 보호·서명 절차를 완료한 APK만 배포하세요. Android/Robolectric 테스트 60개와 배포 도구 테스트 8개가 통과했습니다. 별도 fixture가 없는 10개 테스트는 제외했고 실제 휴대폰 검증은 하지 않았습니다. 정식 Release 게시 단계에서 서명 검증과 Android 14 에뮬레이터 실행 검사를 수행합니다.

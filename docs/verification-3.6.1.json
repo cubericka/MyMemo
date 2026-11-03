@@ -1,11 +1,30 @@
 {
+  "source_commit": "1f8df94845f66e1a2199dc5ce228b21cf1ac5c11",
+  "ci_run_id": 41668462694,
   "version_name": "3.6.1",
   "version_code": 361,
-  "source_commit": "926308949e2c3725187b3c7c87753effd24935d9",
-  "ci_run_id": 41666575076,
-  "ci_url": "https://github.com/cubericka/MyMemo/actions/runs/41666575076",
-  "release_compile": "passed_unsigned",
-  "debug_compile": "passed",
+  "application_id": "com.cubericka.mymemo.titledrag",
+  "apk": {
+    "filename": "MyMemo-3.4.2-release.apk",
+    "bytes": 1495367,
+    "sha256": "79fbc6c5123ea2d32726d51e9b2db5fe4e95dd808b243a4f675a7146073d7b31",
+    "debuggable": false,
+    "signature_v2": true,
+    "signature_v3": true,
+    "integrity_verification": "OK"
+  },
+  "signing": {
+    "alias": "release",
+    "format": "PKCS12",
+    "algorithm": "RSA",
+    "bits": 4096,
+    "certificate_sha256": "c4e0943c2bb1aa2478f9c33ab1fe3a8926fd2d416259e36113f11004c4da7d85",
+    "valid_until_utc": "2054-03-21T15:52:44+00:00",
+    "application_id": "com.cubericka.mymemo.titledrag",
+    "version_name": "3.6.1",
+    "version_code": 361,
+    "new_signing_lineage": true
+  },
   "android_tests": {
     "tests": 70,
     "failures": 0,
@@ -127,31 +146,9 @@
       "skipped": 0
     }
   ],
-  "host_release_pipeline_tests": {
-    "passed": 8,
-    "failed": 0
-  },
-  "apk": {
-    "filename": "MyMemo-3.6.1-test.apk",
-    "bytes": 17719588,
-    "sha256": "36d2ccc593dbc0e89de461533b851d49db52886af1f5f6114acc068cd1ec2fab",
-    "application_id": "com.cubericka.mymemo.titledrag.debug",
-    "signature_verified_in_ci": true,
-    "type": "debug_test_only",
-    "certificate_sha256": "d64ea914b81023b009401a70d8c778be879b08f5ae2708cacadfff7d48e8712c"
-  },
-  "production_signature": {
-    "status": "not_created",
-    "reason": "Existing release signing key is excluded from GitHub and is unavailable in the current workspace",
-    "expected_certificate_sha256": "c79f39f8c3de98981ea85d8a4e6c40e5b084fcc3807d97b815603991dce0d5d4"
-  },
-  "not_verified": [
-    "Physical device installation and execution",
-    "In-place update over signed production 3.6.0",
-    "Real device Android Keystore and OEM launcher behavior",
-    "10 installed-package integrity fixture tests (fixtures unavailable)"
-  ],
-  "main_merged": false,
-  "backup_commit": "b30e473cdcd93ea10e0610e135f5e90e26d83d88",
-  "memo_options_app_lock_removed": true
+  "host_tests_passed": 8,
+  "emulator_status": "pending",
+  "physical_device_status": "not_tested",
+  "update_from_previous_signer": false,
+  "main_merged": false
 }
