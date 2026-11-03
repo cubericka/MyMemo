@@ -10,7 +10,7 @@ import java.util.UUID
 
 data class Draft(val title: String = "", val body: String = "", val checks: List<CheckItem> = emptyList(), val template: String = "quick", val details: Map<String, String> = emptyMap())
 interface ContentStore { suspend fun save(id: Long, draft: Draft): Long }
-class MemoRepository(val db: MemoDatabase, private val authorize: suspend () -> Unit = {}, val vault: NoteVault = NoteVault(), private val changed: () -> Unit = {}) : ContentStore {
+class MemoRepository(val db: MemoDatabase, private val authorize: suspend () -> Unit = {}, val vault: NoteVault = NoteVault(), private val readAllowed: () -> Unit = {}, private val recoverKey: (Long)->ByteArray? = {null}, private val rememberKey: (Long,ByteArray)->Unit = {_,_->}, private val changed: () -> Unit = {}) : ContentStore {
  private val dao = db.dao(); private val writes = Mutex()
  val notes = combine(dao.observeNotes(),vault.revision) { all,_ -> all.map(vault::project) }.flowOn(Dispatchers.IO)
  val checks = combine(dao.observeChecks(),dao.observeNotes(),vault.revision) { plain,all,_ -> plain + all.filter { it.lockRootId!=null && vault.has(it.lockRootId) }.flatMap { runCatching { vault.read(it).checks }.getOrDefault(emptyList()) } }.flowOn(Dispatchers.IO)
@@ -18,7 +18,10 @@ class MemoRepository(val db: MemoDatabase, private val authorize: suspend () -> 
   val result = withContext(Dispatchers.IO) { writes.withLock { authorize(); db.withTransaction { action() } } }
   runCatching { changed() }; return result
  }
- private fun access(note: Note) { note.lockRootId?.let { if(!vault.has(it))throw UnlockRequired(it) } }
+ private fun access(note: Note) { readAllowed();note.lockRootId?.let { root ->
+  if(!vault.has(root))recoverKey(root)?.let { key -> try { vault.cache(root,key) } finally { key.fill(0) } }
+  if(!vault.has(root))throw UnlockRequired(root)
+ } }
  suspend fun requireAccess(id: Long) = withContext(Dispatchers.IO) { access(requireNotNull(dao.get(id))) }
  private suspend fun draft(note: Note): Draft { access(note);return if(note.lockRootId!=null)vault.read(note) else Draft(note.title,note.body,dao.checks(note.id),note.template,TemplateDetails.decode(note.details)) }
  suspend fun read(id: Long): Pair<Note, Draft> = withContext(Dispatchers.IO) { db.withTransaction {
@@ -42,7 +45,9 @@ class MemoRepository(val db: MemoDatabase, private val authorize: suspend () -> 
   val all = dao.all();val p=all.find { it.id==parent }
   if (parent != null) { require(p!=null && p.trashedAt==null) { "상위 메모가 없습니다" };access(p) }
   require(TreeRules.depth(parent, all) < 3) { "최대 3단계까지 지원합니다" }
-  val id=dao.insert(Note(parentId = parent, sortOrder = nextOrder(parent, false, all),lockRootId=p?.lockRootId))
+  // Prepend while preserving the relative order of existing normal siblings.
+  TreeRules.ordered(all.filter { it.parentId==parent && !it.pinned && it.trashedAt==null }).forEachIndexed { i,n -> dao.update(n.copy(sortOrder=i.toLong()+1)) }
+  val id=dao.insert(Note(parentId = parent, sortOrder = 0,lockRootId=p?.lockRootId))
   if(p?.lockRootId!=null) { val n=requireNotNull(dao.get(id));store(n,Draft(),n.updatedAt) };id
  }
  override suspend fun save(id: Long, draft: Draft): Long = write {
@@ -70,19 +75,29 @@ class MemoRepository(val db: MemoDatabase, private val authorize: suspend () -> 
   val index = peers.indexOfFirst { it.id == id }; val target = index + delta
   if (index >= 0 && target in peers.indices) { java.util.Collections.swap(peers, index, target); peers.forEachIndexed { i, item -> dao.update(item.copy(sortOrder = i.toLong())) } }
  }
- suspend fun trash(id: Long) = write {
-  val all = dao.all(); require(all.any { it.id == id && it.trashedAt == null }); val ids = TreeRules.descendants(id, all);all.filter { it.id in ids }.forEach(::access)
+ suspend fun trash(id: Long) = trashMany(setOf(id))
+ suspend fun trashMany(selected: Set<Long>) = write {
+  require(selected.isNotEmpty()) { "메모를 선택하세요" }
+  val all = dao.all()
+  require(selected.all { id -> all.any { it.id == id && it.trashedAt == null } }) { "선택한 메모를 찾을 수 없습니다" }
+  val ids = selected.flatMap { TreeRules.descendants(it, all) }.toSet()
+  val affected = all.filter { it.id in ids && it.trashedAt == null }
+  affected.forEach(::access)
   val batch = UUID.randomUUID().toString(); val time = System.currentTimeMillis()
-  all.filter { it.id in ids && it.trashedAt == null }.forEach { dao.update(it.copy(trashedAt = time, trashBatch = batch)) }
+  affected.forEach { dao.update(it.copy(trashedAt = time, trashBatch = batch)) }
  }
  suspend fun restore(id: Long, parent: Long?) = write {
   val all = dao.all(); val root = requireNotNull(dao.get(id)); require(root.trashedAt != null);validateBoundary(root,parent,all); TreeRules.validateMove(id, parent, all)
   val ids = TreeRules.descendants(id, all);all.filter { it.id in ids }.forEach(::access)
   all.filter { it.id in ids && it.trashBatch == root.trashBatch }.forEach { dao.update(it.copy(trashedAt = null, trashBatch = null, parentId = if (it.id == id) parent else it.parentId, sortOrder = if (it.id == id) nextOrder(parent, it.pinned, all) else it.sortOrder)) }
  }
- suspend fun permanentlyDelete(id: Long) = write {
-  val all = dao.all(); val ids = TreeRules.descendants(id, all);all.filter { it.id in ids }.forEach(::access)
-  require(all.filter { it.id in ids }.all { it.trashedAt != null }) { "사용 중인 메모는 영구 삭제할 수 없습니다" }
+ suspend fun permanentlyDelete(id: Long) = permanentlyDeleteMany(setOf(id))
+ suspend fun permanentlyDeleteMany(selected: Set<Long>) = write {
+  require(selected.isNotEmpty()) { "삭제할 메모를 선택하세요" }
+  val all=dao.all()
+  require(selected.all { id -> all.any { it.id==id && it.trashedAt!=null } }) { "휴지통 항목이 변경되었습니다. 다시 선택하세요" }
+  val ids=selected.flatMap { TreeRules.descendants(it,all) }.toSet()
+  require(all.filter { it.id in ids }.all { it.trashedAt!=null }) { "사용 중인 메모는 영구 삭제할 수 없습니다" }
   ids.forEach { dao.erase(it);dao.eraseLock(it) }
  }
  suspend fun enableLock(id: Long,pin: String) {
@@ -108,7 +123,7 @@ class MemoRepository(val db: MemoDatabase, private val authorize: suspend () -> 
     dao.putLock(group.copy(failures=failures,blockedUntil=now+wait));Result.failure(e)
    }
   }
-  val key=result.getOrThrow();try { vault.cache(id,key) } finally { key.fill(0) }
+  val key=result.getOrThrow();try { rememberKey(id,key);vault.cache(id,key) } finally { key.fill(0) }
  }
  suspend fun disableLock(id: Long) {
   write {
@@ -120,6 +135,12 @@ class MemoRepository(val db: MemoDatabase, private val authorize: suspend () -> 
   require(newPin.matches(Regex("[0-9]{4}"))) { "숫자 4자리를 입력하세요" }
   unlock(id,oldPin)
   try { write { val group=requireNotNull(dao.lockGroup(id));dao.putLock(vault.rewrap(group,newPin)) } } finally { vault.forget(id) }
+ }
+ suspend fun recoverKnownKeys() = withContext(Dispatchers.IO) {
+  readAllowed()
+  dao.all().mapNotNull { it.lockRootId }.distinct().forEach { root ->
+   if(!vault.has(root))recoverKey(root)?.let { key -> try { vault.cache(root,key) } finally { key.fill(0) } }
+  }
  }
  fun forgetKeys() = vault.clear()
 }

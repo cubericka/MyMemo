@@ -7,7 +7,7 @@ public class VerifyApk {
   var result=new ApkVerifier.Builder(new File(args[0])).build().verify();
   if(!result.isVerified()) { System.out.println("APK_SIGNATURE_INVALID"); System.exit(2); }
   var certs=new ArrayList<byte[]>(); for(var cert:result.getSignerCertificates()) certs.add(cert.getEncoded());
-  String verdict=PackageIntegrity.verify(new File(args[0]),certs,new HashSet<>(Arrays.asList(args[1].split(","))),"com.personal.memostarter",342);
+  String verdict=PackageIntegrity.verify(new File(args[0]),certs,new HashSet<>(Arrays.asList(args[1].split(","))),args[2],Long.parseLong(args[3]));
   System.out.println(verdict); if(!verdict.equals("OK"))System.exit(3);
  }
 }

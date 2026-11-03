@@ -16,3 +16,11 @@ release-output/
 *.p12
 *.jks
 *.keystore
+
+PRIVATE-SIGNING/
+credentials.json
+**/__pycache__/
+*.pyc
+.kotlin/
+.env
+.env.*

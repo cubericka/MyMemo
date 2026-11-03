@@ -5,6 +5,7 @@ Requires two EXTERNAL disposable test keys. Never use a production key here.
 import argparse, hashlib, json, os, pathlib, shutil, struct, subprocess, zipfile, zlib
 p=argparse.ArgumentParser();p.add_argument('--apk',required=True);p.add_argument('--approved-key',required=True);p.add_argument('--untrusted-key',required=True);p.add_argument('--pin',required=True);p.add_argument('--sdk',required=True);p.add_argument('--output',required=True)
 a=p.parse_args();root=pathlib.Path(__file__).resolve().parent.parent;out=pathlib.Path(a.output).resolve();out.mkdir(parents=True,exist_ok=True)
+policy=json.loads((root/'tools/release-policy.json').read_text())
 java=pathlib.Path(os.environ['JAVA_HOME'])/'bin';bt=pathlib.Path(a.sdk)/'build-tools/35.0.0';env=dict(os.environ,LD_LIBRARY_PATH=str(bt/'lib64')+':'+os.environ.get('LD_LIBRARY_PATH',''))
 classes=out/'classes';classes.mkdir(exist_ok=True);cp=str(bt/'lib/apksigner.jar')
 subprocess.run([str(java/'javac'),'-cp',cp,'-d',str(classes),str(root/'app/src/main/java/com/personal/memostarter/PackageIntegrity.java'),str(root/'tools/VerifyApk.java')],check=True)
@@ -38,7 +39,7 @@ raw=bytearray(pathlib.Path(a.apk).read_bytes());entry=base['classes.dex'][0];off
 cases={'normal.apk':'OK','dex-modified.apk':'CONTENT_HASH','resigned.apk':'SIGNER','native-modified.apk':'CONTENT_HASH','resource-modified.apk':'CONTENT_HASH','added-dex.apk':'ENTRY_SET','removed-resource.apk':'ENTRY_SET','index-modified.apk':'INDEX_SIGNATURE','unsealed.apk':'UNREADABLE','signature-broken.apk':'APK_SIGNATURE_INVALID'}
 results=[]
 for file,expected in cases.items():
- r=subprocess.run([str(java/'java'),'-cp',str(classes)+os.pathsep+cp,'VerifyApk',str(out/file),a.pin],capture_output=True,text=True)
+ r=subprocess.run([str(java/'java'),'-cp',str(classes)+os.pathsep+cp,'VerifyApk',str(out/file),a.pin,policy['application_id'],str(policy['version_code'])],capture_output=True,text=True)
  actual=r.stdout.strip();assert actual==expected,(file,expected,actual,r.stderr)
  results.append({'file':file,'expected':expected,'actual':actual,'pass':True,'sha256':hashlib.sha256((out/file).read_bytes()).hexdigest()})
  print(file,actual)

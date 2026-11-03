@@ -70,4 +70,25 @@ class ScreenTests {
   val saved=kotlinx.coroutines.runBlocking { vm.repo.read(requireNotNull(vm.editor.value).id).second }
   org.junit.Assert.assertEquals("대기 후 저장",saved.body)
  }
+ @Test fun selectionButtonSelectsMultipleAndDeleteRequiresConfirmation() {
+  val vm=androidx.lifecycle.ViewModelProvider(compose.activity)[MainViewModel::class.java]
+  kotlinx.coroutines.runBlocking {
+   val a=vm.repo.create(null);vm.repo.save(a,Draft("선택 하나"))
+   val b=vm.repo.create(null);vm.repo.save(b,Draft("선택 둘"))
+  }
+  compose.waitUntil(15_000) { compose.onAllNodesWithText("선택 하나").fetchSemanticsNodes().isNotEmpty() }
+  compose.onNodeWithText("최근 수정").assertDoesNotExist()
+  compose.onNodeWithContentDescription("메모 선택").performClick()
+  compose.onNodeWithText("선택 하나").performClick()
+  compose.onNodeWithText("1개 선택").assertExists()
+  compose.onNodeWithText("선택 둘").performClick()
+  compose.onNodeWithText("2개 선택").assertExists()
+  compose.onNodeWithContentDescription("선택 메모 삭제").performClick()
+  compose.onNodeWithText("취소").performClick()
+  compose.onNodeWithText("2개 선택").assertExists()
+  compose.onNodeWithContentDescription("선택 메모 삭제").performClick()
+  compose.onNodeWithText("삭제",useUnmergedTree=true).performClick()
+  compose.waitUntil(15_000) { compose.onAllNodesWithText("선택 하나").fetchSemanticsNodes().isEmpty() }
+  org.junit.Assert.assertTrue(kotlinx.coroutines.runBlocking { vm.repo.snapshot().first.all { it.trashedAt!=null } })
+ }
 }
