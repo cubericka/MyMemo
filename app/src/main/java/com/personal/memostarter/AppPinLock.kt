@@ -53,6 +53,8 @@ class AppPinLock(private val prefs: SharedPreferences, private val device: Devic
  @Synchronized fun disable(pin: String) { unlock(pin);writeMode(null) }
  @Synchronized fun lock() { master?.fill(0);master=null;unlocked.value=!enabled.value;locking.value=false }
  @Synchronized fun remember(root: Long,key: ByteArray) {
+  // An old note's PIN must not become a permanent bypass before app PIN setup.
+  if(!enabled.value)return
   val k=master();val r=requireNotNull(record());val legacy=r.optJSONObject("legacy") ?: JSONObject()
   legacy.put(root.toString(),VaultCrypto.seal(SecretKeySpec(k,"AES"),key,"legacy:$root".toByteArray()))
   commit(r.put("legacy",legacy))

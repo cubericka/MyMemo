@@ -34,7 +34,7 @@ class AppPinTests {
  }
  @Test fun changingAndDisablingPinPreservesLegacyKeys() {
   val lock=AppPinLock(prefs,device);val key=VaultCrypto.random(32)
-  lock.remember(7,key);lock.enable("1234");lock.change("1234","4321");lock.lock()
+  lock.enable("1234");lock.remember(7,key);lock.change("1234","4321");lock.lock()
   assertTrue(runCatching{lock.unlock("1234")}.isFailure);lock.unlock("4321");assertArrayEquals(key,lock.recover(7))
   assertTrue(runCatching{lock.disable("0000")}.isFailure);assertTrue(lock.enabled.value)
   lock.disable("4321");val restart=AppPinLock(prefs,device)
@@ -44,6 +44,18 @@ class AppPinTests {
   prefs.edit().putString("record","broken-record").commit();val lock=AppPinLock(prefs,device)
   assertTrue(lock.enabled.value);assertFalse(lock.unlocked.value);assertTrue(runCatching{lock.unlock("1234")}.isFailure)
   assertEquals("broken-record",prefs.getString("record",null))
+ }
+ @Test fun oldNoteUnlockWithoutAppPinDoesNotPersistAnAuthenticationBypass()=runBlocking {
+  val db=Room.inMemoryDatabaseBuilder(context,MemoDatabase::class.java).build()
+  try {
+   val lock=AppPinLock(prefs,device)
+   fun repo()=MemoRepository(db,vault=NoteVault(device),readAllowed=lock::requireOpen,recoverKey=lock::recover,rememberKey=lock::remember)
+   val first=repo();val id=first.create(null);first.save(id,Draft("보호된 메모","기존 내용"))
+   first.enableLock(id,"9876");first.forgetKeys();first.unlock(id,"9876")
+   assertEquals("기존 내용",first.read(id).second.body)
+   assertTrue(runCatching { repo().read(id) }.exceptionOrNull() is UnlockRequired)
+   assertNull(prefs.getString("record",null))
+  } finally { db.close() }
  }
  @Test fun legacyEncryptedNoteEnrollsOnceAndIsReadableAfterCommonPinChange()=runBlocking {
   val db=Room.inMemoryDatabaseBuilder(context,MemoDatabase::class.java).build()
