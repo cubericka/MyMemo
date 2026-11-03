@@ -15,6 +15,8 @@ class AppPinLock(private val prefs: SharedPreferences, private val device: Devic
  private fun record()=prefs.getString("record",null)?.let(::JSONObject)
  val enabled=MutableStateFlow(runCatching { record()?.getBoolean("enabled") ?: false }.getOrDefault(true))
  val unlocked=MutableStateFlow(!enabled.value)
+ val locking=MutableStateFlow(false)
+ fun coverWhileSaving() { if(enabled.value)locking.value=true }
  @Synchronized fun requireOpen() { if(!unlocked.value)throw AppUnlockRequired() }
  private fun commit(r: JSONObject) { check(prefs.edit().putString("record",r.toString()).commit()) { "잠금 설정 저장에 실패했습니다" } }
  private fun master(): ByteArray {
@@ -49,7 +51,7 @@ class AppPinLock(private val prefs: SharedPreferences, private val device: Devic
  }
  @Synchronized fun change(old: String,new: String) { require(new.matches(Regex("[0-9]{4}")));unlock(old);writeMode(new) }
  @Synchronized fun disable(pin: String) { unlock(pin);writeMode(null) }
- @Synchronized fun lock() { master?.fill(0);master=null;unlocked.value=!enabled.value }
+ @Synchronized fun lock() { master?.fill(0);master=null;unlocked.value=!enabled.value;locking.value=false }
  @Synchronized fun remember(root: Long,key: ByteArray) {
   val k=master();val r=requireNotNull(record());val legacy=r.optJSONObject("legacy") ?: JSONObject()
   legacy.put(root.toString(),VaultCrypto.seal(SecretKeySpec(k,"AES"),key,"legacy:$root".toByteArray()))

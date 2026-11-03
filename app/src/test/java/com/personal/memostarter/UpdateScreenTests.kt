@@ -35,6 +35,12 @@ class UpdateScreenTests {
   compose.runOnIdle { vm.appLock.enabled.value=true;vm.appLock.unlocked.value=false }
   compose.onNodeWithText("앱 PIN 4자리").assertExists();compose.onNodeWithContentDescription("새 메모").assertDoesNotExist()
  }
+ @Test fun pendingBackgroundSaveCannotExposeMemoListInAnotherEntry() {
+  compose.runOnIdle { vm.appLock.enabled.value=true;vm.appLock.coverWhileSaving() }
+  compose.onNodeWithText("잠금 중…").assertExists()
+  compose.onNodeWithContentDescription("새 메모").assertDoesNotExist()
+  compose.onNodeWithText("앱 PIN 4자리").assertDoesNotExist()
+ }
  @Test fun selectedTrashDeletionLeavesUnselectedMemo() {
   runBlocking { listOf("선택한 메모","남길 메모").forEach { title->
    val id=vm.repo.create(null);vm.repo.save(id,Draft(title));vm.repo.trash(id)

@@ -16,9 +16,12 @@ import kotlinx.coroutines.withContext
 
 @Composable fun AppLockBoundary(app: MemoApp,content: @Composable ()->Unit) {
  val open by app.appLock.unlocked.collectAsState();val enabled by app.appLock.enabled.collectAsState()
+ val locking by app.appLock.locking.collectAsState()
  val activity=LocalContext.current as? Activity
  SideEffect { if(enabled)activity?.window?.addFlags(WindowManager.LayoutParams.FLAG_SECURE) }
- if(open)content() else {
+ if(locking) {
+  Column(Modifier.fillMaxSize().padding(24.dp),verticalArrangement=Arrangement.Center) { Text("잠금 중…");CircularProgressIndicator() }
+ } else if(open)content() else {
   var pin by remember { mutableStateOf("") };var error by remember { mutableStateOf<String?>(null) };var busy by remember { mutableStateOf(false) };val scope=rememberCoroutineScope()
   Scaffold(topBar={InkTopAppBar(title={Text("앱 잠금")})}) { padding ->
    Column(Modifier.padding(padding).fillMaxSize().padding(24.dp),verticalArrangement=Arrangement.Center) {

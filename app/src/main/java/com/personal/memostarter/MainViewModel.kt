@@ -40,6 +40,7 @@ class MainViewModel(application: Application, private val saved: SavedStateHandl
  fun lockNow() = action { flush();editor.value?.dispose();editor.value=null;saved.remove<Long>("open_id");repo.forgetKeys();repo.recoverKnownKeys() }
  fun onBackground() {
   privacyCovered.value=true
+  appLock.coverWhileSaving()
   val current=editor.value
   backgroundJob=app.scope.launch { try { current?.saveNow() } finally { repo.forgetKeys();appLock.lock() } }
  }
