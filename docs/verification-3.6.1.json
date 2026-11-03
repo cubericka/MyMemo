@@ -1,0 +1,155 @@
+{
+  "version_name": "3.6.1",
+  "version_code": 361,
+  "source_commit": "1886552cff2d78f5e5306ff03f40ea6efe67d77a",
+  "ci_run_id": 41660992558,
+  "ci_url": "https://github.com/cubericka/MyMemo/actions/runs/41660992558",
+  "release_compile": "passed_unsigned",
+  "debug_compile": "passed",
+  "android_tests": {
+    "tests": 70,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 10,
+    "passed": 60
+  },
+  "test_suites": [
+    {
+      "suite": "com.personal.memostarter.AppPinTests",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.AppPinWidgetTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.DatabaseTests",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.EditorTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.InkAmberScreenshots",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.InstalledIntegrityTests",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 10
+    },
+    {
+      "suite": "com.personal.memostarter.IntegrityTests",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.ReorderTests",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.ScreenTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.SelectionTests",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.TemplateTests",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.TitleDragTests",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.TrashUpdateTests",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.UpdateScreenTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.VaultTests",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.WidgetTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "host_release_pipeline_tests": {
+    "passed": 8,
+    "failed": 0
+  },
+  "apk": {
+    "filename": "MyMemo-3.6.1-test.apk",
+    "bytes": 17719588,
+    "sha256": "cb5cafcc647c8c136cc2a6bedaa2ad07691a80bdb3074bc3966dd4c1424a1c68",
+    "application_id": "com.cubericka.mymemo.titledrag.debug",
+    "signature_verified_in_ci": true,
+    "type": "debug_test_only"
+  },
+  "production_signature": {
+    "status": "not_created",
+    "reason": "Existing release signing key is excluded from GitHub and is unavailable in the current workspace",
+    "expected_certificate_sha256": "c79f39f8c3de98981ea85d8a4e6c40e5b084fcc3807d97b815603991dce0d5d4"
+  },
+  "not_verified": [
+    "Physical device installation and execution",
+    "In-place update over signed production 3.6.0",
+    "Real device Android Keystore and OEM launcher behavior",
+    "10 installed-package integrity fixture tests (fixtures unavailable)"
+  ],
+  "main_merged": false,
+  "backup_commit": "b30e473cdcd93ea10e0610e135f5e90e26d83d88"
+}

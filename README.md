@@ -6,7 +6,9 @@
 
 - 패키지: `com.cubericka.mymemo.titledrag`
 - 버전: `3.6.1` (361)
-- APK 파일명: `MyMemo-3.4.2-release.apk` (기존 이름 유지; 실제 버전은 APK 내부 정보 기준)
+- 정식 서명 출력 파일명: `MyMemo-3.4.2-release.apk` (기존 이름 유지)
+- 현재 제공 테스트 APK: `MyMemo-3.6.1-test.apk` — 별도 설치용 `.debug` 패키지
+- 저장소 루트 APK는 기존 3.4.2입니다. 3.6.1 정식 서명 APK는 기존 키 부재로 미제작입니다.
 - [기능·호환성·검증 상태](docs/release-3.6.1.md)
 - 기존 main 백업: `backup/legacy-version`
 
@@ -26,3 +28,5 @@ python3 tools/build_release.py --java-home /path/to/jdk17 --sdk /path/to/android
 ```
 
 기존 GitHub 3.4.2와 첨부된 3.6.0은 패키지 및 서명이 다릅니다. 3.6.1은 첨부된 3.6.0 계열의 업데이트이며, GitHub 구버전의 메모를 자동 이전하지 않습니다. 기기에서 기존 앱을 삭제하거나 데이터를 초기화하지 마세요.
+
+자동 검증: Android 테스트 60개 + 배포 도구 테스트 8개 통과. 별도 fixture가 필요한 10개 테스트와 실기기 설치·업데이트 검증은 미확인입니다. 상세 결과와 파일 목록은 [릴리스 설명](docs/release-3.6.1.md)을 참조하세요.
