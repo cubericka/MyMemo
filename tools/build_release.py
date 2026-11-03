@@ -69,7 +69,7 @@ def main():
     env['MYMEMO_STORE_PASSWORD'] = password
     password = None
     run_id = datetime.now().strftime('%Y%m%d-%H%M%S') + '-' + uuid.uuid4().hex[:8]
-    output = PROJECT / 'release-output' / run_id / 'MyMemo-3.4.2-release.apk'
+    output = PROJECT / 'release-output' / run_id / f'MyMemo-{policy["version_name"]}-release.apk'
     try:
         subprocess.run([sys.executable, str(PROJECT / 'tools/protect_release.py'), '--apk', str(apk),
                         '--output', str(output), '--keystore', str(key), '--alias', a.alias,

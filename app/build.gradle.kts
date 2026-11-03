@@ -2,12 +2,12 @@ plugins { id("com.android.application"); id("org.jetbrains.kotlin.android"); id(
 android {
  namespace = "com.personal.memostarter"
  compileSdk = 36
- defaultConfig { applicationId = "com.cubericka.mymemo.titledrag"; minSdk = 26; targetSdk = 36; versionCode = 361; versionName = "3.6.1"; testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"; manifestPlaceholders["appLabel"] = "My Memo 드래그"
+ defaultConfig { applicationId = "com.cubericka.mymemo.titledrag"; minSdk = 26; targetSdk = 36; versionCode = 362; versionName = "3.5"; testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"; manifestPlaceholders["appLabel"] = "MyMemo"
   val pins = providers.environmentVariable("MYMEMO_RELEASE_CERT_SHA256").orElse("").get().lowercase()
   require(pins.isEmpty() || pins.split(",").all { it.matches(Regex("[0-9a-f]{64}")) }) { "Invalid release certificate fingerprint" }
   buildConfigField("String", "RELEASE_CERT_PINS", "\"$pins\"") }
  buildTypes {
-  getByName("debug") { applicationIdSuffix = ".debug"; manifestPlaceholders["appLabel"] = "My Memo 드래그 테스트" }
+  getByName("debug") { applicationIdSuffix = ".debug"; manifestPlaceholders["appLabel"] = "MyMemo 테스트" }
   getByName("release") {
    isMinifyEnabled = true
    isShrinkResources = true

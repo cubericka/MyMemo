@@ -25,7 +25,7 @@ import kotlinx.coroutines.withContext
   var pin by remember { mutableStateOf("") };var error by remember { mutableStateOf<String?>(null) };var busy by remember { mutableStateOf(false) };val scope=rememberCoroutineScope()
   Scaffold(topBar={InkTopAppBar(title={Text("앱 잠금")})}) { padding ->
    Column(Modifier.padding(padding).fillMaxSize().padding(24.dp),verticalArrangement=Arrangement.Center) {
-    Text("My Memo 드래그",style=MaterialTheme.typography.headlineSmall)
+    Text("MyMemo",style=MaterialTheme.typography.headlineSmall)
     Text("앱 공통 PIN을 입력하세요. 기존 메모는 그대로 보관됩니다.")
     OutlinedTextField(pin,{if(it.length<=4 && it.all { c->c in '0'..'9' })pin=it},label={Text("앱 PIN 4자리")},singleLine=true,enabled=!busy,visualTransformation=PasswordVisualTransformation(),keyboardOptions=KeyboardOptions(keyboardType=KeyboardType.NumberPassword),modifier=Modifier.fillMaxWidth().padding(vertical=16.dp))
     error?.let { Text(it,color=MaterialTheme.colorScheme.error) }

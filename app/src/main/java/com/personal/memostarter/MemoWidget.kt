@@ -46,7 +46,7 @@ class MemoWidget : AppWidgetProvider() {
    val (notes, checks) = (context.applicationContext as MemoApp).repository.snapshot()
    for (id in ids) {
     val choice = WidgetSettings.get(context, id); val note = notes.find { it.id == choice.noteId && it.trashedAt == null }; val view = RemoteViews(context.packageName, R.layout.memo_widget)
-    val title = when { choice.noteId == null -> "My Memo"; note == null -> "메모를 사용할 수 없음"; note.lockRootId != null -> "잠긴 메모"; choice.hide -> "비공개 메모"; else -> note.displayTitle }
+    val title = when { choice.noteId == null -> "MyMemo"; note == null -> "메모를 사용할 수 없음"; note.lockRootId != null -> "잠긴 메모"; choice.hide -> "비공개 메모"; else -> note.displayTitle }
     val ownChecks = checks.filter { it.noteId == note?.id }
     val preview = buildList { if (!note?.body.isNullOrBlank()) add(note!!.body); addAll(ownChecks.map { (if (it.done) "☑ " else "☐ ") + it.text }) }.joinToString("\n")
     val body = when { choice.noteId == null -> "표시할 메모 선택"; note == null -> "설정에서 메모를 다시 선택하세요"; note.lockRootId != null -> "앱에서 비밀번호를 입력해 확인하세요"; choice.hide -> "내용을 보려면 누르세요"; else -> preview.ifBlank { "내용 없음" } }

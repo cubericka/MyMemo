@@ -55,11 +55,11 @@ jobs:
       - name: Verify and package installable test APK
         run: |
           mkdir -p test-apk
-          cp app/build/outputs/apk/debug/app-debug.apk test-apk/MyMemo-3.6.1-test.apk
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs test-apk/MyMemo-3.6.1-test.apk > test-apk/signature.txt
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging test-apk/MyMemo-3.6.1-test.apk > test-apk/package.txt
+          cp app/build/outputs/apk/debug/app-debug.apk test-apk/MyMemo-3.5-test.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs test-apk/MyMemo-3.5-test.apk > test-apk/signature.txt
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging test-apk/MyMemo-3.5-test.apk > test-apk/package.txt
           cd test-apk
-          sha256sum MyMemo-3.6.1-test.apk > SHA256SUMS
+          sha256sum MyMemo-3.5-test.apk > SHA256SUMS
       - uses: actions/upload-artifact@v4
         with:
           name: test-apk

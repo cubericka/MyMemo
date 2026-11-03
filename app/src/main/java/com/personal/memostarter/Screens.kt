@@ -87,7 +87,7 @@ private fun date(time: Long) = SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.KOREA
   Text(context.applicationInfo.loadLabel(context.packageManager).toString(),style=MaterialTheme.typography.titleMedium)
   Text("버전 ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
   Text("제작자: 아카라이브 모르윈")
-  Spacer(Modifier.height(12.dp));Text("광고·로그인 없는 오프라인 메모장\n내용은 자동 저장되며 수동 저장도 가능합니다. 휴지통은 자동으로 비우지 않으며 복원을 지원하지 않습니다. 앱 공통 PIN을 잊으면 복구할 수 없습니다. 앱 삭제·데이터 초기화 시 메모가 지워집니다.\n홈 화면의 위젯 메뉴에서 My Memo를 추가하세요.")
+  Spacer(Modifier.height(12.dp));Text("광고·로그인 없는 오프라인 메모장\n내용은 자동 저장되며 수동 저장도 가능합니다. 휴지통은 자동으로 비우지 않으며 복원을 지원하지 않습니다. 앱 공통 PIN을 잊으면 복구할 수 없습니다. 앱 삭제·데이터 초기화 시 메모가 지워집니다.\n홈 화면의 위젯 메뉴에서 MyMemo를 추가하세요.")
  }},confirmButton={TextButton(onClick={about=false}){Text("확인")}})
  error?.let { msg -> AlertDialog(onDismissRequest = { vm.error.value = null }, title = { Text("작업 안내") }, text = { Text(msg) }, confirmButton = { TextButton(onClick = { vm.error.value = null }) { Text("확인") } }) }
 }
@@ -124,7 +124,7 @@ private fun rows(all: List<Note>, roots: List<Note>, collapsed: Set<Long>): List
  val displayed = drag.projected(active)
  val roots = TreeRules.ordered(displayed.filter { it.parentId == null })
  val matches = if (query.isNotBlank()) TreeRules.ordered(displayed.filter { n -> n.title.contains(query, true) || n.body.contains(query, true) || TemplateDetails.searchable(n.details).contains(query, true) || checks.any { it.noteId == n.id && it.text.contains(query, true) } }) else emptyList()
- Scaffold(topBar = { InkTopAppBar(title = { Text(if(selectionMode) "${selected.size}개 선택" else "My Memo", fontWeight = FontWeight.Bold) }, navigationIcon = { if(selectionMode) Action(Icons.Outlined.Close, "선택 취소", !busy) { selected = longArrayOf(); selectionMode=false } }, actions = {
+ Scaffold(topBar = { InkTopAppBar(title = { Text(if(selectionMode) "${selected.size}개 선택" else "MyMemo", fontWeight = FontWeight.Bold) }, navigationIcon = { if(selectionMode) Action(Icons.Outlined.Close, "선택 취소", !busy) { selected = longArrayOf(); selectionMode=false } }, actions = {
   if(selectionMode) Action(Icons.Outlined.Delete, "선택 메모 삭제", !busy && selected.isNotEmpty()) { confirmDelete = true } else {
   Action(Icons.Outlined.Lock, "앱 잠금 설정", !busy, onAppLock)
   Action(Icons.Outlined.Checklist, "메모 선택", !busy) { selectionMode=true }
