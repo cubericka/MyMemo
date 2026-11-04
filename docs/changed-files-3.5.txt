@@ -1,0 +1,20 @@
+Compared with v3.6.1 / 28c124fa1965561c2affba976300babde0e175c9
+Changed or added:
+app/build.gradle.kts
+app/src/main/java/com/personal/memostarter/AppLockScreen.kt
+app/src/main/java/com/personal/memostarter/Screens.kt
+app/src/main/java/com/personal/memostarter/MemoWidget.kt
+app/src/main/res/layout/memo_widget.xml
+tools/release-policy.json
+tools/build_release.py
+.github/workflows/validate.yml
+.github/workflows/publish-release.yml
+.github/scripts/smoke_release.py
+README.md
+docs/release-3.5.md
+docs/verification-3.5.json
+docs/changed-files-3.5.txt
+MyMemo-3.5-release.apk
+
+Removed from current branch (retained in v3.6.1):
+MyMemo-3.4.2-release.apk

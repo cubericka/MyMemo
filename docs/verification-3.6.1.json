@@ -1,0 +1,169 @@
+{
+  "source_commit": "1f8df94845f66e1a2199dc5ce228b21cf1ac5c11",
+  "ci_run_id": 41668462694,
+  "version_name": "3.6.1",
+  "version_code": 361,
+  "application_id": "com.cubericka.mymemo.titledrag",
+  "apk": {
+    "filename": "MyMemo-3.4.2-release.apk",
+    "bytes": 1495367,
+    "sha256": "79fbc6c5123ea2d32726d51e9b2db5fe4e95dd808b243a4f675a7146073d7b31",
+    "debuggable": false,
+    "signature_v2": true,
+    "signature_v3": true,
+    "integrity_verification": "OK"
+  },
+  "signing": {
+    "alias": "release",
+    "format": "PKCS12",
+    "algorithm": "RSA",
+    "bits": 4096,
+    "certificate_sha256": "c4e0943c2bb1aa2478f9c33ab1fe3a8926fd2d416259e36113f11004c4da7d85",
+    "valid_until_utc": "2054-03-21T15:52:44+00:00",
+    "application_id": "com.cubericka.mymemo.titledrag",
+    "version_name": "3.6.1",
+    "version_code": 361,
+    "new_signing_lineage": true
+  },
+  "android_tests": {
+    "tests": 70,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 10,
+    "passed": 60
+  },
+  "test_suites": [
+    {
+      "suite": "com.personal.memostarter.AppPinTests",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.AppPinWidgetTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.DatabaseTests",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.EditorTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.InkAmberScreenshots",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.InstalledIntegrityTests",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 10
+    },
+    {
+      "suite": "com.personal.memostarter.IntegrityTests",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.ReorderTests",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.ScreenTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.SelectionTests",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.TemplateTests",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.TitleDragTests",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.TrashUpdateTests",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.UpdateScreenTests",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.VaultTests",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "suite": "com.personal.memostarter.WidgetTests",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "host_tests_passed": 8,
+  "emulator_status": "passed",
+  "physical_device_status": "not_tested",
+  "update_from_previous_signer": false,
+  "main_merged": false,
+  "emulator_checks": {
+    "api": 34,
+    "environment": "Android emulator, not physical device",
+    "passed_checks": [
+      "signed_release_install",
+      "release_version_and_non_debuggable",
+      "installed_integrity_and_main_pin_entry",
+      "memo_menu_has_no_app_lock_and_keeps_actions",
+      "memo_creation_and_save",
+      "app_pin_setup_with_android_keystore",
+      "pin_and_memo_persist_after_process_restart",
+      "saved_memo_reopens_after_unlock"
+    ]
+  },
+  "emulator_run": 41724522227
+}

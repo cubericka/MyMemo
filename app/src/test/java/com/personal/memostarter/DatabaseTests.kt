@@ -30,7 +30,7 @@ class DatabaseTests {
    r.reorderTo(a,c)
    disk.close();disk=MemoDatabase.open(context,name)
    val reopened=MemoRepository(disk)
-   assertEquals(listOf(b,c,a),TreeRules.ordered(reopened.snapshot().first.filter { it.parentId==null }).map { it.id })
+   assertEquals(listOf(a,c,b),TreeRules.ordered(reopened.snapshot().first.filter { it.parentId==null }).map { it.id })
    assertEquals(a,reopened.read(child).first.parentId)
    assertEquals("preserved",reopened.read(child).second.body)
    assertTrue(reopened.read(child).second.checks.single().done)
@@ -66,5 +66,22 @@ class DatabaseTests {
   assertEquals("기존 제목", draft.title); assertEquals("줄1\n줄2", draft.body); assertEquals(12345L, note.updatedAt); assertEquals(12345L, note.createdAt)
   val child = r.create(7); r.save(child, Draft(checks = listOf(CheckItem("persist", child, "saved", true)))); migrated.close()
   val reopened = MemoDatabase.open(context, name); assertTrue(MemoRepository(reopened).read(child).second.checks.single().done); reopened.close(); context.deleteDatabase(name); Unit
+ }
+ @Test fun customOrderSurvivesEditNewNoteAndDatabaseReopen() = runBlocking {
+  val name="title-order-${UUID.randomUUID()}.db"
+  var disk=MemoDatabase.open(context,name)
+  try {
+   val r=MemoRepository(disk)
+   val a=r.create(null);val b=r.create(null);val c=r.create(null)
+   assertEquals(listOf(c,b,a),TreeRules.ordered(r.snapshot().first).map { it.id })
+   r.reorderTo(a,c);r.save(b,Draft("수정한 제목","본문 유지"))
+   assertEquals(listOf(a,c,b),TreeRules.ordered(r.snapshot().first).map { it.id })
+   val fresh=r.create(null)
+   disk.close();disk=MemoDatabase.open(context,name)
+   val reopened=MemoRepository(disk)
+   assertEquals(listOf(fresh,a,c,b),TreeRules.ordered(reopened.snapshot().first).map { it.id })
+   assertEquals("본문 유지",reopened.read(b).second.body)
+  } finally { disk.close();context.deleteDatabase(name) }
+  Unit
  }
 }

@@ -1,0 +1,75 @@
+name: Prepare reviewed 3.6.1 draft release
+on:
+  push:
+    branches: [update/v3.6.1-app-pin-trash]
+    paths: ['.github/workflows/draft-release.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: mymemo-draft-release-3.6.1
+  cancel-in-progress: false
+jobs:
+  draft:
+    if: github.ref == 'refs/heads/update/v3.6.1-app-pin-trash'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Verify tested source and prepare draft assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          VALIDATED_SHA: 926308949e2c3725187b3c7c87753effd24935d9
+          VALIDATED_RUN: '41666575076'
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/$GH_REPO/actions/runs/$VALIDATED_RUN --jq .conclusion)" = success
+          test "$(gh api repos/$GH_REPO/actions/runs/$VALIDATED_RUN --jq .head_sha)" = "$VALIDATED_SHA"
+          git diff --exit-code "$VALIDATED_SHA" HEAD -- app tools gradle gradlew gradlew.bat settings.gradle.kts build.gradle.kts gradle.properties .github/workflows/validate.yml
+          if gh release view v3.6.1 >/dev/null 2>&1; then
+            test "$(gh release view v3.6.1 --json isDraft --jq .isDraft)" = true
+            test "$(gh api repos/$GH_REPO/releases/432873215 --jq .draft)" = true
+          fi
+          gh run download "$VALIDATED_RUN" -n test-apk -D release-assets/test-apk
+          gh run download "$VALIDATED_RUN" -n unsigned-release-input -D release-assets/unsigned-input
+          gh run download "$VALIDATED_RUN" -n verification-reports -D release-assets/reports
+          (cd release-assets/test-apk && sha256sum --check SHA256SUMS)
+          python3 - <<'PY'
+          from pathlib import Path
+          import subprocess,zipfile,hashlib,shutil
+          out=Path('release-assets')
+          apk=out/'test-apk/MyMemo-3.6.1-test.apk'
+          assert hashlib.sha256(apk.read_bytes()).hexdigest()=='36d2ccc593dbc0e89de461533b851d49db52886af1f5f6114acc068cd1ec2fab'
+          shutil.copy2(apk,out/apk.name)
+          for name in ('signature.txt','package.txt'):
+              shutil.copy2(out/'test-apk'/name,out/name)
+          shutil.copy2('docs/verification-3.6.1.json',out/'verification-3.6.1.json')
+          for directory,name in [('unsigned-input','MyMemo-3.6.1-unsigned-release-input.zip'),('reports','MyMemo-3.6.1-verification-reports.zip')]:
+              with zipfile.ZipFile(out/name,'w',zipfile.ZIP_DEFLATED) as z:
+                  for p in sorted((out/directory).rglob('*')):
+                      if p.is_file():z.write(p,p.relative_to(out/directory))
+          names=subprocess.check_output(['git','ls-files','-z']).decode().split('\0')
+          with zipfile.ZipFile(out/'MyMemo-3.6.1-source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for name in names:
+                  if not name or name.endswith('.apk'):continue
+                  assert not name.lower().endswith(('.p12','.pfx','.jks','.keystore','.key','.password'))
+                  assert Path(name).name!='credentials.json'
+                  z.write(name,'MyMemo-3.6.1-source/'+name)
+          files=sorted(p for p in out.iterdir() if p.is_file())
+          (out/'SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in files))
+          PY
+          if gh release view v3.6.1 >/dev/null 2>&1; then
+            gh release upload v3.6.1 release-assets/*.apk release-assets/*.zip release-assets/*.txt release-assets/*.json release-assets/SHA256SUMS --clobber
+            gh release edit v3.6.1 --target "$GITHUB_SHA" --draft --prerelease \
+              --title 'MyMemo 3.6.1 메모 옵션 수정 · 정식 서명 대기' --notes-file docs/release-3.6.1.md
+          else
+            gh release create v3.6.1 release-assets/*.apk release-assets/*.zip release-assets/*.txt release-assets/*.json release-assets/SHA256SUMS \
+              --target "$GITHUB_SHA" --draft --prerelease \
+              --title 'MyMemo 3.6.1 메모 옵션 수정 · 정식 서명 대기' --notes-file docs/release-3.6.1.md
+          fi
+          gh release view v3.6.1 --json url,isDraft,isPrerelease

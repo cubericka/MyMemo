@@ -30,13 +30,23 @@ class MemoWidget : AppWidgetProvider() {
    val manager = AppWidgetManager.getInstance(context); val ids = manager.getAppWidgetIds(ComponentName(context, MemoWidget::class.java)); if (ids.isEmpty()) return@withLock
    val guard = (context.applicationContext as MemoApp).integrity
    if (!guard.refresh()) {
-    for (id in ids) { val blocked = RemoteViews(context.packageName, R.layout.memo_widget); blocked.setTextViewText(R.id.widget_title, "앱 보호 확인 실패"); blocked.setTextViewText(R.id.widget_body, "메모는 보존됩니다. 공식 APK로 복구하세요."); manager.updateAppWidget(id, blocked) }
+    for (id in ids) { val blocked = RemoteViews(context.packageName, R.layout.memo_widget); blocked.setViewVisibility(R.id.widget_list, android.view.View.GONE); blocked.setViewVisibility(R.id.widget_content, android.view.View.VISIBLE); blocked.setTextViewText(R.id.widget_title, "앱 보호 확인 실패"); blocked.setTextViewText(R.id.widget_body, "메모는 보존됩니다. 공식 APK로 복구하세요."); manager.updateAppWidget(id, blocked) }
     return@withLock
+   }
+   if((context.applicationContext as MemoApp).appLock.enabled.value) {
+    for(id in ids) {
+     val view=RemoteViews(context.packageName,R.layout.memo_widget)
+     view.setViewVisibility(R.id.widget_list,android.view.View.GONE);view.setViewVisibility(R.id.widget_content,android.view.View.VISIBLE)
+     view.setTextViewText(R.id.widget_title,"앱 잠금 사용 중");view.setTextViewText(R.id.widget_body,"앱에서 PIN을 입력하세요")
+     val open=PendingIntent.getActivity(context,id,Intent(context,MainActivity::class.java).setData(Uri.parse("mymemo://widget/$id/locked")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+     for(target in listOf(R.id.widget_content,R.id.widget_add,R.id.widget_settings))view.setOnClickPendingIntent(target,open)
+     manager.updateAppWidget(id,view);manager.notifyAppWidgetViewDataChanged(id,R.id.widget_list)
+    };return@withLock
    }
    val (notes, checks) = (context.applicationContext as MemoApp).repository.snapshot()
    for (id in ids) {
     val choice = WidgetSettings.get(context, id); val note = notes.find { it.id == choice.noteId && it.trashedAt == null }; val view = RemoteViews(context.packageName, R.layout.memo_widget)
-    val title = when { choice.noteId == null -> "My Memo"; note == null -> "메모를 사용할 수 없음"; note.lockRootId != null -> "잠긴 메모"; choice.hide -> "비공개 메모"; else -> note.displayTitle }
+    val title = when { choice.noteId == null -> "MyMemo"; note == null -> "메모를 사용할 수 없음"; note.lockRootId != null -> "잠긴 메모"; choice.hide -> "비공개 메모"; else -> note.displayTitle }
     val ownChecks = checks.filter { it.noteId == note?.id }
     val preview = buildList { if (!note?.body.isNullOrBlank()) add(note!!.body); addAll(ownChecks.map { (if (it.done) "☑ " else "☐ ") + it.text }) }.joinToString("\n")
     val body = when { choice.noteId == null -> "표시할 메모 선택"; note == null -> "설정에서 메모를 다시 선택하세요"; note.lockRootId != null -> "앱에서 비밀번호를 입력해 확인하세요"; choice.hide -> "내용을 보려면 누르세요"; else -> preview.ifBlank { "내용 없음" } }
@@ -49,7 +59,14 @@ class MemoWidget : AppWidgetProvider() {
     view.setOnClickPendingIntent(R.id.widget_settings, pending("settings", config))
     view.setOnClickPendingIntent(R.id.widget_content, if (note == null) pending("choose", Intent(config)) else pending("open", Intent(context, MainActivity::class.java).putExtra("note_id", note.id)))
     view.setOnClickPendingIntent(R.id.widget_add, pending("new", Intent(context, MainActivity::class.java).putExtra("new_note", true)))
-    runCatching { manager.updateAppWidget(id, view) }
+    view.setViewVisibility(R.id.widget_content, if(choice.noteIds.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE)
+    view.setViewVisibility(R.id.widget_list, if(choice.noteIds.isEmpty()) android.view.View.GONE else android.view.View.VISIBLE)
+    val adapter = Intent(context, MemoWidgetService::class.java).putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id).setData(Uri.parse("mymemo://widget/$id/list"))
+    view.setRemoteAdapter(R.id.widget_list, adapter)
+    view.setEmptyView(R.id.widget_list, R.id.widget_content)
+    val open = Intent(context, MainActivity::class.java).setData(Uri.parse("mymemo://widget/$id/item")).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    view.setPendingIntentTemplate(R.id.widget_list, PendingIntent.getActivity(context, id, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE))
+    runCatching { manager.updateAppWidget(id, view); manager.notifyAppWidgetViewDataChanged(id, R.id.widget_list) }
    }
   }
  }

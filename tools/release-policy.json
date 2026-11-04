@@ -1,7 +1,7 @@
 {
-  "application_id": "com.personal.memostarter",
-  "version_code": 342,
-  "version_name": "3.4.2-protected",
+  "application_id": "com.cubericka.mymemo.titledrag",
+  "version_code": 362,
+  "version_name": "3.5",
   "build_tools": "35.0.0",
-  "certificate_sha256": "9a07d3fb061cd33f62cae6b6214df51acc0ad6fb40175da24a2a9a511adc8aef"
+  "certificate_sha256": "c4e0943c2bb1aa2478f9c33ab1fe3a8926fd2d416259e36113f11004c4da7d85"
 }

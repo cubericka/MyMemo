@@ -14,6 +14,13 @@ class ScreenTests {
  @get:Rule val compose = createAndroidComposeRule<MainActivity>()
  @Test fun createEditSaveSearchAndReopen() {
   compose.onNodeWithContentDescription("새 메모").performClick(); compose.waitUntil(15_000) { compose.onAllNodes(hasSetTextAction()).fetchSemanticsNodes().size >= 2 }
+  compose.onNodeWithContentDescription("편집 메뉴").performClick()
+  compose.onNodeWithText("앱 잠금 설정").assertDoesNotExist()
+  compose.onNodeWithText("상단 고정").assertExists()
+  compose.onNodeWithText("다른 위치로 이동").assertExists()
+  compose.onNodeWithText("휴지통으로").assertExists()
+  compose.onNodeWithText("메모 정보").performClick()
+  compose.onNodeWithText("확인").performClick()
   compose.onAllNodes(hasSetTextAction())[0].performTextInput("검수 제목"); compose.onAllNodes(hasSetTextAction())[1].performTextInput("줄1\n검색용 고유단어"); compose.onNodeWithText("저장", useUnmergedTree = true).performClick()
   compose.waitUntil(15_000) { compose.onAllNodesWithText("저장됨").fetchSemanticsNodes().isNotEmpty() }; compose.onNodeWithContentDescription("저장하고 목록으로").performClick()
   compose.waitUntil(15_000) { compose.onAllNodesWithContentDescription("메모 검색").fetchSemanticsNodes().isNotEmpty() }; compose.onNodeWithContentDescription("메모 검색").performClick(); compose.onNode(hasSetTextAction()).performTextInput("고유단어")
@@ -69,5 +76,26 @@ class ScreenTests {
   compose.waitUntil(15_000) { compose.onAllNodesWithText("저장했습니다").fetchSemanticsNodes().isNotEmpty() }
   val saved=kotlinx.coroutines.runBlocking { vm.repo.read(requireNotNull(vm.editor.value).id).second }
   org.junit.Assert.assertEquals("대기 후 저장",saved.body)
+ }
+ @Test fun selectionButtonSelectsMultipleAndDeleteRequiresConfirmation() {
+  val vm=androidx.lifecycle.ViewModelProvider(compose.activity)[MainViewModel::class.java]
+  kotlinx.coroutines.runBlocking {
+   val a=vm.repo.create(null);vm.repo.save(a,Draft("선택 하나"))
+   val b=vm.repo.create(null);vm.repo.save(b,Draft("선택 둘"))
+  }
+  compose.waitUntil(15_000) { compose.onAllNodesWithText("선택 하나").fetchSemanticsNodes().isNotEmpty() }
+  compose.onNodeWithText("최근 수정").assertDoesNotExist()
+  compose.onNodeWithContentDescription("메모 선택").performClick()
+  compose.onNodeWithText("선택 하나").performClick()
+  compose.onNodeWithText("1개 선택").assertExists()
+  compose.onNodeWithText("선택 둘").performClick()
+  compose.onNodeWithText("2개 선택").assertExists()
+  compose.onNodeWithContentDescription("선택 메모 삭제").performClick()
+  compose.onNodeWithText("취소").performClick()
+  compose.onNodeWithText("2개 선택").assertExists()
+  compose.onNodeWithContentDescription("선택 메모 삭제").performClick()
+  compose.onNodeWithText("삭제",useUnmergedTree=true).performClick()
+  compose.waitUntil(15_000) { compose.onAllNodesWithText("선택 하나").fetchSemanticsNodes().isEmpty() }
+  org.junit.Assert.assertTrue(kotlinx.coroutines.runBlocking { vm.repo.snapshot().first.all { it.trashedAt!=null } })
  }
 }

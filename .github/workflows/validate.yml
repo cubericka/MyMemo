@@ -1,0 +1,82 @@
+name: Android validation
+on:
+  pull_request:
+  push:
+    branches: [update/v3.6.1-app-pin-trash]
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'tools/**'
+      - '*.gradle.kts'
+      - '.github/workflows/validate.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MYMEMO_RELEASE_CERT_SHA256: c4e0943c2bb1aa2478f9c33ab1fe3a8926fd2d416259e36113f11004c4da7d85
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+      - uses: android-actions/setup-android@v4
+        with:
+          cmdline-tools-version: 12266719
+      - name: Install Android SDK packages
+        run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
+      - name: Compile release and run tests
+        run: ./gradlew --no-daemon :app:assembleRelease :app:assembleDebug :app:testDebugUnitTest
+      - name: Verify release tooling
+        run: python3 -m unittest discover -s tools -p test_release_pipeline.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: verification-reports
+          path: |
+            app/build/test-results/
+            app/build/reports/
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-release-input
+          path: |
+            app/build/outputs/apk/release/app-release-unsigned.apk
+            app/build/generated/source/buildConfig/release/com/personal/memostarter/BuildConfig.java
+          if-no-files-found: error
+          retention-days: 3
+      - name: Verify and package installable test APK
+        run: |
+          mkdir -p test-apk
+          cp app/build/outputs/apk/debug/app-debug.apk test-apk/MyMemo-3.5-test.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs test-apk/MyMemo-3.5-test.apk > test-apk/signature.txt
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging test-apk/MyMemo-3.5-test.apk > test-apk/package.txt
+          cd test-apk
+          sha256sum MyMemo-3.5-test.apk > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: test-apk
+          path: test-apk/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Package public tools for offline signing
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p offline-tools/sdk/build-tools/35.0.0
+          "$JAVA_HOME/bin/jlink" --add-modules java.base,java.compiler,jdk.compiler,jdk.crypto.ec,jdk.zipfs,java.logging,java.xml,java.naming --strip-debug --no-header-files --no-man-pages --output offline-tools/java
+          cp "$ANDROID_HOME/build-tools/35.0.0/zipalign" "$ANDROID_HOME/build-tools/35.0.0/aapt" offline-tools/sdk/build-tools/35.0.0/
+          cp -r "$ANDROID_HOME/build-tools/35.0.0/lib" "$ANDROID_HOME/build-tools/35.0.0/lib64" offline-tools/sdk/build-tools/35.0.0/
+          tar -czf offline-signing-tools.tar.gz -C offline-tools .
+      - uses: actions/upload-artifact@v4
+        if: github.event_name == 'push'
+        with:
+          name: offline-signing-tools
+          path: offline-signing-tools.tar.gz
+          retention-days: 1

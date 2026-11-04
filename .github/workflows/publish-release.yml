@@ -1,0 +1,109 @@
+name: Verify and publish signed 3.5
+on:
+  push:
+    branches: [update/v3.6.1-app-pin-trash]
+    paths: ['MyMemo-3.5-release.apk', '.github/workflows/publish-release.yml', '.github/scripts/smoke_release.py']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: mymemo-official-release-3.5
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/update/v3.6.1-app-pin-trash'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BUILD_SHA: 6a000fb90942216179120d1e31e3b59ca44016a7
+      BUILD_RUN: '41735395175'
+      APK_SHA256: 27d61c23a6183db56b75b6730687fb889013f8f6995cee35efdf51b9d027eaf5
+      CERT_SHA256: c4e0943c2bb1aa2478f9c33ab1fe3a8926fd2d416259e36113f11004c4da7d85
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Verify source, signed APK and integrity
+        run: |
+          set -euo pipefail
+          test "$(gh api repos/$GH_REPO/actions/runs/$BUILD_RUN --jq .conclusion)" = success
+          test "$(gh api repos/$GH_REPO/actions/runs/$BUILD_RUN --jq .head_sha)" = "$BUILD_SHA"
+          git diff --exit-code "$BUILD_SHA" HEAD -- app tools gradle gradlew gradlew.bat settings.gradle.kts build.gradle.kts gradle.properties .github/workflows/validate.yml
+          if gh release view v3.5 >/dev/null 2>&1; then echo 'Release already exists; refusing to replace it.'; exit 1; fi
+          printf '%s  %s\n' "$APK_SHA256" MyMemo-3.5-release.apk | sha256sum --check
+          printf '%s  %s\n' "$CERT_SHA256" docs/MyMemo-release-certificate.der | sha256sum --check
+          sdkmanager 'build-tools;35.0.0'
+          mkdir -p release-checks/classes
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs MyMemo-3.5-release.apk > release-checks/signature.txt
+          grep -F "$CERT_SHA256" release-checks/signature.txt
+          "$ANDROID_HOME/build-tools/35.0.0/zipalign" -c -P 16 4 MyMemo-3.5-release.apk
+          javac -cp "$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" -d release-checks/classes tools/VerifyApk.java app/src/main/java/com/personal/memostarter/PackageIntegrity.java
+          java -cp "release-checks/classes:$ANDROID_HOME/build-tools/35.0.0/lib/apksigner.jar" VerifyApk MyMemo-3.5-release.apk "$CERT_SHA256" com.cubericka.mymemo.titledrag 362 > release-checks/integrity-verification.txt
+          grep -x OK release-checks/integrity-verification.txt
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging MyMemo-3.5-release.apk > release-checks/package.txt
+          if grep -q application-debuggable release-checks/package.txt; then exit 1; fi
+          grep -x "application-label:'MyMemo'" release-checks/package.txt
+      - name: Prepare previous production APK and emulator
+        run: |
+          gh release download v3.6.1 --pattern MyMemo-3.4.2-release.apk --dir previous-apk
+          printf '%s  %s\n' 79fbc6c5123ea2d32726d51e9b2db5fe4e95dd808b243a4f675a7146073d7b31 previous-apk/MyMemo-3.4.2-release.apk | sha256sum --check
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Verify update preserves memo and PIN
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_2
+          disable-animations: true
+          script: python3 .github/scripts/smoke_release.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: signed-release-verification
+          path: release-checks/
+          retention-days: 30
+      - name: Publish verified official APK
+        run: |
+          set -euo pipefail
+          if gh release view v3.5 >/dev/null 2>&1; then echo 'Release already exists; refusing to replace it.'; exit 1; fi
+          gh run download "$BUILD_RUN" -n verification-reports -D unit-reports
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,json,os,shutil,subprocess,zipfile
+          out=Path('official-assets');out.mkdir()
+          shutil.copy2('MyMemo-3.5-release.apk',out/'MyMemo-3.5-release.apk')
+          shutil.copy2('docs/MyMemo-release-certificate.der',out/'MyMemo-release-certificate.der')
+          for name in ('signature.txt','package.txt','integrity-verification.txt','emulator-results.json'):
+              shutil.copy2(Path('release-checks')/name,out/name)
+          report=json.loads(Path('docs/verification-3.5.json').read_text())
+          checks=json.loads((out/'emulator-results.json').read_text())
+          assert set(checks['passed_checks'])=={'installed_integrity_and_main_pin_entry', 'updated_release_version_and_non_debuggable', 'pin_and_memo_persist_after_process_restart', 'previous_release_version_and_non_debuggable', 'memo_menu_has_no_app_lock_and_keeps_actions', 'memo_creation_and_save', 'updated_app_name_on_lock_screen', 'app_pin_setup_with_android_keystore', 'updated_memo_menu_has_no_app_lock', 'in_place_update_from_3_6_1_to_3_5', 'previous_signed_release_install', 'saved_memo_reopens_after_unlock'}
+          report.update(emulator_status='passed',emulator_checks=checks,release_commit=os.environ['GITHUB_SHA'],publish_run=os.environ['GITHUB_RUN_ID'],emulator_run=os.environ['GITHUB_RUN_ID'])
+          (out/'release-verification.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+          with zipfile.ZipFile(out/'MyMemo-3.5-source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for name in subprocess.check_output(['git','ls-files','-z']).decode().split('\0'):
+                  if not name or name.endswith('.apk'):continue
+                  assert not name.lower().endswith(('.p12','.pfx','.jks','.keystore','.key','.password'))
+                  assert Path(name).name!='credentials.json'
+                  z.write(name,'MyMemo-3.5-source/'+name)
+          with zipfile.ZipFile(out/'MyMemo-3.5-verification-reports.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for directory in ('unit-reports','release-checks'):
+                  for p in sorted(Path(directory).rglob('*')):
+                      if p.is_file() and p.suffix!='.class':z.write(p,p)
+          files=sorted(p for p in out.iterdir() if p.is_file())
+          (out/'SHA256SUMS').write_text(''.join(hashlib.sha256(p.read_bytes()).hexdigest()+'  '+p.name+'\n' for p in files))
+          PY
+          gh release create v3.5 official-assets/* --target "$GITHUB_SHA" --title 'MyMemo 3.5' --notes-file docs/release-3.5.md --latest
+          gh release view v3.5 --json url,isDraft,isPrerelease,assets
