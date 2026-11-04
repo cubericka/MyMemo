@@ -41,14 +41,14 @@ def fill(index, value):
     adb('shell', 'input', 'text', value)
 
 try:
-    result = adb('install', '-r', 'MyMemo-3.4.2-release.apk')
+    result = adb('install', '-r', 'previous-apk/MyMemo-3.4.2-release.apk')
     assert 'Success' in result
-    checks.append('signed_release_install')
+    checks.append('previous_signed_release_install')
     package = adb('shell', 'dumpsys', 'package', APP)
     assert 'versionCode=361' in package and 'versionName=3.6.1' in package
     flags = re.findall(r'(?:pkgFlags|flags)=\[([^\]]*)\]', package)
     assert flags and all('DEBUGGABLE' not in f for f in flags)
-    checks.append('release_version_and_non_debuggable')
+    checks.append('previous_release_version_and_non_debuggable')
     adb('shell', 'am', 'start', '-W', '-n', ACTIVITY)
     wait_for('content-desc', '새 메모')
     wait_for('content-desc', '앱 잠금 설정')
@@ -79,8 +79,17 @@ try:
     wait_for('text', '지금 잠그기')
     checks.append('app_pin_setup_with_android_keystore')
     adb('shell', 'am', 'force-stop', APP)
+    assert 'Success' in adb('install', '-r', 'MyMemo-3.5-release.apk')
+    checks.append('in_place_update_from_3_6_1_to_3_5')
+    package = adb('shell', 'dumpsys', 'package', APP)
+    assert 'versionCode=362' in package and 'versionName=3.5' in package
+    flags = re.findall(r'(?:pkgFlags|flags)=\[([^\]]*)\]', package)
+    assert flags and all('DEBUGGABLE' not in f for f in flags)
+    checks.append('updated_release_version_and_non_debuggable')
     adb('shell', 'am', 'start', '-W', '-n', ACTIVITY)
     wait_for('text', '앱 PIN 4자리')
+    wait_for('text', 'MyMemo')
+    checks.append('updated_app_name_on_lock_screen')
     assert not any(n.get('text') == 'Release361Smoke' for n in ui().iter('node'))
     fill(0, '7284')
     adb('shell', 'input', 'keyevent', '4')
@@ -91,6 +100,12 @@ try:
     wait_for('text', '읽기 모드')
     wait_for('text', 'SavedReleaseMemo')
     checks.append('saved_memo_reopens_after_unlock')
+    click('text', '수정')
+    click('content-desc', '편집 메뉴')
+    texts = {n.get('text') for n in ui().iter('node')}
+    assert '앱 잠금 설정' not in texts
+    assert {'메모 정보','상단 고정','다른 위치로 이동','휴지통으로'} <= texts
+    checks.append('updated_memo_menu_has_no_app_lock')
 finally:
     (OUT/'emulator-results.json').write_text(json.dumps({'api':34,'environment':'Android emulator, not physical device','passed_checks':checks},ensure_ascii=False,indent=2)+'\n')
     (OUT/'logcat.txt').write_text(adb('logcat','-d','-s','AndroidRuntime:E'))
