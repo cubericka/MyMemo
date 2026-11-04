@@ -22,4 +22,4 @@ python3 tools/build_release.py --java-home /path/to/jdk17 --sdk /path/to/android
 
 비밀번호는 대화형으로 입력합니다. Gradle의 미서명 중간 APK를 배포하지 마세요. 서명 도구는 정책의 실제 버전으로 `MyMemo-3.5-release.apk` 파일명을 생성합니다.
 
-기존 main 백업은 `backup/legacy-version`, 이전 배포 기록은 [v3.6.1](https://github.com/cubericka/MyMemo/releases/tag/v3.6.1)에 보존합니다. 기본 브랜치 병합은 별도 승인 전까지 보류합니다.
+기존 main 백업은 `backup/legacy-version`, 이전 배포 기록은 [v3.6.1](https://github.com/cubericka/MyMemo/releases/tag/v3.6.1)에 보존합니다. 검증된 3.5 소스와 정식 APK는 [PR #2](https://github.com/cubericka/MyMemo/pull/2)를 통해 `main`에 반영했습니다.
